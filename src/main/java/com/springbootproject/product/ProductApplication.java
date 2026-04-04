@@ -8,7 +8,8 @@ public class ProductApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ProductApplication.class, args);
-		System.out.println("this is product projects");
+		System.out.println("YOURS PROJECTS IS RUNNING.........");
+
 	}
 
 }
