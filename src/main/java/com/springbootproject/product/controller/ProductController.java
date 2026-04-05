@@ -16,8 +16,8 @@ public class ProductController {
 
     private ProductService productService;
 
-    // Create Product               //  ↓  JSON to Java Object
-    @PostMapping
+    // Create Product
+    @PostMapping                                //  ↓  JSON to Java Object
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO){
         return new ResponseEntity<>(productService.createProduct(productDTO), HttpStatus.CREATED);
     }

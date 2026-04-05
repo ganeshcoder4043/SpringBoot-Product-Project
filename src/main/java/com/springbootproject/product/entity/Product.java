@@ -14,7 +14,7 @@ public class Product {
     private String description;
     private Double price;
 
-    @ManyToOne   // ↓  yeh product class mein kis product ki kis category ka hai then we use @JoinColumn
+    @ManyToOne(fetch = FetchType.LAZY)   // yeh product class mein kis product ki kis category ka hai then we use @JoinColumn
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 

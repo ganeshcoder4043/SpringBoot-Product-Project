@@ -3,6 +3,7 @@ package com.springbootproject.product.service;
 import com.springbootproject.product.dto.ProductDTO;
 import com.springbootproject.product.entity.Category;
 import com.springbootproject.product.entity.Product;
+import com.springbootproject.product.exception.CategoryNotFoundException;
 import com.springbootproject.product.mapper.ProductMapper;
 import com.springbootproject.product.repository.CategoryRepository;
 import com.springbootproject.product.repository.ProductRepository;
@@ -21,7 +22,8 @@ public class ProductService {
     // Create Product
     public ProductDTO createProduct(ProductDTO productDTO){
         Category category = categoryRepository.findById(productDTO.getCategoryId())
-                .orElseThrow(()->new RuntimeException("Category Not Found!!!!"));
+                .orElseThrow(()->new CategoryNotFoundException
+                        ("Category id "+ productDTO.getCategoryId()+" Not Found!!!!"));
 
 //        DTO to Entity
         Product product = ProductMapper.toProductEntity(productDTO, category);
@@ -35,7 +37,7 @@ public class ProductService {
                .stream().map(ProductMapper::toProductDTO).toList();
     }
 
-    // Get Product By Id
+    // Get Product By id
     public ProductDTO getProductById(Long id){
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product Not Found!!!!!!"));
@@ -61,10 +63,10 @@ public class ProductService {
 
      }
 
-    // Product Delete By Id
+    // Product Delete By id
     public String deleteProduct(Long id){
         productRepository.deleteById(id);
-        return "YOUR PRODUCT "+ id +" HAS BEEN SUCESSFULLY DELETEDED";
+        return "YOUR PRODUCT "+ id +" HAS BEEN SUCCESSFULLY DELETED";
     }
 
 
