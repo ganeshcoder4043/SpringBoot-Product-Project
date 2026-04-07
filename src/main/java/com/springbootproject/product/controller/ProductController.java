@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +32,8 @@ public class ProductController {
             summary = "Create new product",
             description = "Create a new product by providing product details in request body"
     )
+    @PreAuthorize("hasAuthority('ROLE_SELLER')")  // for Single Role
+//    @PreAuthorize("hasAnyRole('SELLER','ADMIN')") // for both role
     @PostMapping                                //  ↓  JSON to Java Object
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO){
         return new ResponseEntity<>(productService.createProduct(productDTO), HttpStatus.CREATED);
@@ -61,6 +64,7 @@ public class ProductController {
             summary = "Update product",
             description = "Update existing product using ID and new product details"
     )
+    @PreAuthorize("hasAuthority('ROLE_SELLER')")
     @PutMapping("/{id}")
     public ProductDTO updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO){
         return productService.updateProduct(id,productDTO);
@@ -71,6 +75,7 @@ public class ProductController {
             summary = "Delete product",
             description = "Delete product from database using product ID"
     )
+    @PreAuthorize("hasAuthority('ROLE_SELLER')")
     @DeleteMapping("/{id}")
     public String deleteProduct(@PathVariable Long id){
        return productService.deleteProduct(id);
