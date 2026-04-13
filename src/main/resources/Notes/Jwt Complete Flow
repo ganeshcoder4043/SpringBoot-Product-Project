@@ -1,0 +1,309 @@
+JWT AUTHENTICATION - POINT TO POINT NOTES
+=========================================
+
+PART 1: REGISTER FLOW
+---------------------
+- Client POST request bhejta hai /user/register endpoint par.
+- Request body mein username aur password hota hai.
+- Request UserController.register() method tak pahunchti hai.
+- Controller MyUserDetailsService.createUser(user) method call karta hai.
+- createUser() method ke andar:
+    - Pehle BCryptPasswordEncoder(12) se password encode hota hai.
+    - user.setPassword(encodedPassword) se user object mein encoded password set hota hai.
+    - userRepository.save(user) call hota hai.
+- UserRepository JPA ka method use karke MySQL database mein INSERT query run karta hai.
+- Database mein naya user save ho jata hai.
+- Saved user object (with ID) controller ko return hota hai.
+- Controller client ko saved user object JSON format mein return karta hai.
+- Response Status: 200 OK.
+
+
+PART 2: LOGIN FLOW
+------------------
+- Client POST request bhejta hai /user/login endpoint par.
+- Request body mein UserDTO object hota hai jisme username aur password hai.
+- Request UserController.login() method tak pahunchti hai.
+- Controller sabse pehle AuthenticationManager.authenticate() call karta hai.
+- authenticate() ke parameter mein UsernamePasswordAuthenticationToken object pass hota hai.
+- AuthenticationManager internally MyUserDetailsService.loadUserByUsername() call karta hai.
+- loadUserByUsername() method:
+    - userRepository.findByUsername(username) call karta hai.
+    - Database se SELECT * FROM Users WHERE username = ? query run hoti hai.
+    - Agar user nahi milta toh UsernameNotFoundException throw hota hai.
+    - Agar user milta hai toh UserPrincipal object return hota hai.
+- AuthenticationManager received password ko database ke encoded password se match karta hai (BCrypt compare).
+- Agar password match ho jata hai toh Authentication object return hota hai.
+- Agar password match nahi hota toh BadCredentialsException throw hota hai.
+- Authentication success hone par controller SecurityContextHolder.getContext().setAuthentication() call karta hai.
+- Is call se current user us request ke liye "Logged In" mark ho jata hai.
+- Controller phir user ke roles extract karta hai authentication.getAuthorities() se.
+- Roles ki list ["ROLE_SELLER"] format mein milti hai.
+- Controller phir se userDetailsService.loadUserByUsername() call karta hai UserDetails object lene ke liye.
+- Controller JwtUtil.generateToken(username, roles) call karta hai.
+- generateToken() method:
+    - Token ka Header banata hai: {"alg":"HS256","typ":"JWT"}
+    - Token ka Payload banata hai: {"sub":"rahul","roles":["ROLE_SELLER"],"iat":timestamp,"exp":timestamp+2min}
+    - Secret Key se Signature generate karta hai.
+    - Teen parts ko . se join karke ek String token banata hai.
+- Generated token String controller ko return hota hai.
+- Controller client ko token String return karta hai.
+- Response Status: 200 OK.
+- Response Body: Token String (eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOi...)
+
+
+PART 3: PROTECTED API CALL FLOW (WITH JWT TOKEN)
+------------------------------------------------
+- Client kisi protected endpoint par request bhejta hai, example: GET /api/products.
+- Request ke Header mein Authorization: Bearer <token> include hota hai.
+- Request sabse pehle JwtRequestFilter.doFilterInternal() method mein jaati hai.
+- Filter Authorization header ko extract karta hai: String authHeader = request.getHeader("Authorization").
+- Filter check karta hai ki header null toh nahi aur Bearer  se start hota hai ya nahi.
+- Agar header valid hai toh authHeader.substring(7) se token extract karta hai.
+- Filter phir jwtUtil.extractUsername(token) call karta hai.
+- IMPORTANT: Extract hua username username variable mein assign karna zaroori hai: username = jwtUtil.extractUsername(token).
+- extractUsername() token ke Payload se sub claim nikalta hai.
+- Agar username != null aur SecurityContext mein pehle se authentication nahi hai toh filter aage badhta hai.
+- Filter userDetailsService.loadUserByUsername(username) call karta hai.
+- Ye call database se user ki details load karta hai.
+- Filter phir jwtUtil.extractRole(token) call karta hai roles nikalne ke liye.
+- Roles ki list ko List<SimpleGrantedAuthority> mein convert karta hai.
+- Filter jwtUtil.validToken(token, userDetails.getUsername()) call karta hai.
+- validToken() check karta hai:
+    - Token ka username match karta hai ya nahi.
+    - Token expire hua hai ya nahi (isTokenExpired()).
+- Agar token valid hai toh filter UsernamePasswordAuthenticationToken object banata hai.
+- authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request)) call karta hai.
+- Filter SecurityContextHolder.getContext().setAuthentication(authToken) call karta hai.
+- Is call se user Spring Security ke context mein authenticated set ho jata hai.
+- Filter ant mein filterChain.doFilter(request, response) call karta hai.
+- Request aage badhkar DispatcherServlet tak pahunchti hai.
+- DispatcherServlet request ko appropriate Controller ke method par route karta hai.
+- Controller ka method (e.g., ProductController.getAllProducts()) execute hota hai.
+- Controller business logic run karta hai aur response object return karta hai.
+- Response client ko JSON format mein milta hai.
+- Response Status: 200 OK.
+- Response Body: ["Mobile", "Laptop", "TV", "Fridge", "AC"]
+
+
+PART 4: IMPORTANT POINTS (YAAD RAKHNE LAYAK)
+--------------------------------------------
+- BCryptPasswordEncoder(12) - 12 rounds ka password hashing.
+- UserDetailsService - Interface, database se user load karne ke liye.
+- UserDetails - Interface, Spring Security ka user representation.
+- UserPrincipal - Custom class jo UserDetails implement karta hai.
+- OncePerRequestFilter - Har request par ek baar execute hota hai.
+- SecurityContextHolder - Current logged-in user ka context store karta hai.
+- AuthenticationManager - Authentication process ka main manager.
+- DaoAuthenticationProvider - Database authentication ke liye provider.
+- SessionCreationPolicy.STATELESS - Server session create nahi karta.
+- JWT Token 3 parts mein divide hota hai: Header.Payload.Signature.
+- Token expiry tumne 1000 * 60 * 2 (2 minutes) set kiya hai.
+- Har application restart par nayi secret key generate hoti hai (current code mein).
+- /user/register aur /user/login public endpoints hain.
+- GET /api/** bhi public hai (tumhari config mein).
+- Baaki sab endpoints authenticated hain.
+
+
+PART 5: COMMON MISTAKE (FORBIDDEN 403 KA REASON)
+------------------------------------------------
+- Galat Line: jwtUtil.extractUsername(token);
+- Sahi Line: username = jwtUtil.extractUsername(token);
+- Agar username = nahi likhoge toh username variable null rahega.
+- Null hone ki wajah se if (username != null) block skip ho jaayega.
+- SecurityContext set nahi hoga.
+- Controller tak pahunchne se pehle Spring Security 403 Forbidden throw kar dega.
+
+
+PART 6: JWT TOKEN STRUCTURE
+---------------------------
+- Header: Algorithm aur Token Type batata hai. (HS256, JWT)
+- Payload: User data aur claims store karta hai. (username, roles, expiry)
+- Signature: Header aur Payload ko secret key se hash karta hai. (Tampering detect karne ke liye)
+- Format: Header.Payload.Signature (Base64 encoded strings joined by dot)
+
+
+PART 7: SECURITY CONFIG KEY POINTS
+----------------------------------
+- .csrf(csrf -> csrf.disable()) : CSRF protection disable kiya kyunki JWT stateless hai.
+- .authorizeHttpRequests() : URL based security rules define karta hai.
+- .requestMatchers("/user/register", "/user/login").permitAll() : Ye URLs public hain.
+- .anyRequest().authenticated() : Baaki sab URLs require authentication.
+- .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) : Session create nahi hoti.
+- .authenticationProvider(authenticationProvider()) : Custom auth provider set kiya.
+- .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class) : JWT filter add kiya.
+
+
+PART 8: JWT UTIL KEY METHODS
+----------------------------
+- generateToken(username, roles) : Token create karta hai.
+- extractUsername(token) : Token se username nikalta hai.
+- extractRole(token) : Token se roles nikalta hai.
+- extractExpiration(token) : Token se expiry date nikalta hai.
+- isTokenExpired(token) : Check karta hai token expire hua ya nahi.
+- validToken(token, username) : Token valid hai ya nahi (username match + not expired).
+- getSignedKey() : Secret key ko Signing Key mein convert karta hai.
+
+=========================================
+NOTES END
+=========================================
+
+
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            REGISTER FLOW                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Client ──POST /user/register──▶ UserController.register()                  │
+│                                       │                                      │
+│                                       ▼                                      │
+│                          MyUserDetailsService.createUser()                   │
+│                                       │                                      │
+│                                       ▼                                      │
+│                          Password BCrypt Encode → UserRepository.save()      │
+│                                       │                                      │
+│                                       ▼                                      │
+│                               User Saved in DB                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                             LOGIN FLOW                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Client ──POST /user/login──▶ UserController.login()                        │
+│                                     │                                        │
+│                                     ▼                                        │
+│                     AuthenticationManager.authenticate()                     │
+│                                     │                                        │
+│                                     ▼                                        │
+│                  MyUserDetailsService.loadUserByUsername()                   │
+│                                     │                                        │
+│                                     ▼                                        │
+│                         UserRepository.findByUsername()                      │
+│                                     │                                        │
+│                                     ▼                                        │
+│                          JwtUtil.generateToken()                             │
+│                                     │                                        │
+│                                     ▼                                        │
+│                         Token Return to Client                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        PROTECTED API CALL FLOW                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Client ──GET /api/products──▶ JwtRequestFilter.doFilterInternal()          │
+│           Header: Bearer <token>                   │                         │
+│                                                    ▼                         │
+│                                    Authorization Header Check                │
+│                                                    │                         │
+│                                                    ▼                         │
+│                                    Token Extract (Bearer ke baad)            │
+│                                                    │                         │
+│                                                    ▼                         │
+│                                    JwtUtil.extractUsername()                 │
+│                                                    │                         │
+│                                                    ▼                         │
+│                                    MyUserDetailsService.loadUserByUsername() │
+│                                                    │                         │
+│                                                    ▼                         │
+│                                    JwtUtil.validToken()                      │
+│                                                    │                         │
+│                                                    ▼                         │
+│                                    SecurityContext.setAuthentication()       │
+│                                                    │                         │
+│                                                    ▼                         │
+│                                    Controller Tak Request Pahunchi           │
+│                                                    │                         │
+│                                                    ▼                         │
+│                                    Response Return                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+JWT AUTHENTICATION - SHORT NOTES
+================================
+
+1. UserController
+-----------------
+- /user/register -> User save karta hai DB mein (password encoded)
+- /user/login -> Username/password verify karta hai, JWT token return karta hai
+
+
+2. UserDTO
+----------
+- Login request ke liye DTO
+- Fields: username, password
+
+
+3. User (Entity)
+----------------
+- Database table: Users
+- Fields: id (auto), username, password
+
+
+4. UserRepository
+-----------------
+- JpaRepository extend karta hai
+- Custom method: findByUsername(username)
+
+
+5. JwtUtil
+----------
+- generateToken() -> Token banata hai (Header + Payload + Signature)
+- extractUsername() -> Token se username nikalta hai
+- extractRole() -> Token se roles nikalta hai
+- validToken() -> Token sahi hai ya nahi check karta hai
+- Token expiry: 2 minutes (1000*60*2)
+
+
+6. JwtRequestFilter
+-------------------
+- OncePerRequestFilter extend karta hai
+- Har request ka Authorization header check karta hai
+- Token valid hai toh SecurityContext set karta hai
+- ⚠️ Common Mistake: username = jwtUtil.extractUsername(token)  // 'username =' bhoolna mat
+
+
+7. SecurityConfig
+-----------------
+- @EnableWebSecurity + @EnableMethodSecurity
+- Public URLs: /user/register, /user/login, GET /api/**
+- Session: STATELESS (JWT ke liye zaroori)
+- AuthenticationProvider: DaoAuthenticationProvider (DB se verify karta hai)
+- PasswordEncoder: BCryptPasswordEncoder
+- JwtRequestFilter add kiya UsernamePasswordAuthenticationFilter se pehle
+
+
+8. UserPrincipal
+----------------
+- UserDetails interface implement karta hai
+- User entity ko Spring Security UserDetails mein convert karta hai
+- getAuthorities() -> ROLE_SELLER return karta hai
+
+
+9. MyUserDetailsService
+-----------------------
+- UserDetailsService implement karta hai
+- createUser() -> Password encode karke user save karta hai
+- loadUserByUsername() -> DB se user load karta hai, UserPrincipal return karta hai
+
+
+10. JWT Token Structure
+-----------------------
+- Header: {"alg":"HS256","typ":"JWT"}
+- Payload: {"sub":"username","roles":["ROLE_SELLER"],"iat":time,"exp":time+2min}
+- Signature: HMACSHA256(Header.Payload, secretKey)
+- Format: xxxxx.yyyyy.zzzzz
+
+
+11. Flow Summary
+----------------
+Register: POST /user/register -> Password encode -> DB save
+Login: POST /user/login -> Verify user -> Generate Token -> Return Token
+API Call: Header Bearer Token -> Filter validate -> SecurityContext set -> Controller execute
+
+
+12. Important Points
+--------------------
+- BCryptPasswordEncoder(12) -> 12 rounds hashing
+- SessionCreationPolicy.STATELESS -> No session created
+- OncePerRequestFilter -> Every request intercepted once
+- SecurityContextHolder -> Stores authenticated user
+- AuthenticationManager -> Manages authentication process
