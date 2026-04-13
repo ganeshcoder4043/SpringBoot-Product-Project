@@ -1,0 +1,209 @@
+================================================================================
+                    OAUTH 2.0 & KEYCLOAK - COMPLETE NOTES
+================================================================================
+
+================================================================================
+PART 1: OAUTH 2.0 INTRODUCTION
+================================================================================
+
+1. OAuth 2.0 Kya Hai?
+---------------------
+- OAuth 2.0 ek **Authorization Framework** hai.
+- Ye ek application ko doosri application ka data access karne ki permission deta hai.
+- **Bina password share kiye.**
+- Example: "Login with Google" button.
+
+2. OAuth 2.0 Ki Zaroorat Kyun Padi?
+-----------------------------------
+- Purane tarike mein user apna Google password third-party app ko deta tha (Security Risk).
+- OAuth 2.0 mein third-party app ko **Token** milta hai, password nahi.
+- Token limited access deta hai aur expire ho jata hai.
+
+3. Real Life Analogy (Hotel Room Key)
+-------------------------------------
+- Bina OAuth: Receptionist tumhara ghar ka main gate ka key maang leta hai. (Risk)
+- OAuth Ke Saath: Receptionist tumhe ek **Card Key** deta hai jo sirf ek room kholega, 2 din ke liye. (Safe)
+
+================================================================================
+PART 2: OAUTH 2.0 ROLES (4 MAIN CHARACTERS)
+================================================================================
+
+| Role | Naam | Kaam | Example |
+|:-----|:-----|:-----|:--------|
+| 1 | Resource Owner | Jiska data hai | User (Tum) |
+| 2 | Client | Data maangne wala app | mycoolapp.com |
+| 3 | Authorization Server | Token dene wala | Google / Keycloak |
+| 4 | Resource Server | Jahan data rakha hai | Google Contacts API |
+
+================================================================================
+PART 3: OAUTH 2.0 GRANT TYPES (FLOWS)
+================================================================================
+
+1. Authorization Code Flow (Most Common & Secure)
+-------------------------------------------------
+- Use Case: Web Applications with Backend (React + Spring Boot).
+- Security: Token directly Backend ko milta hai, Browser mein expose nahi hota.
+- PKCE: Mobile/SPA ke liye enhanced security (Proof Key for Code Exchange).
+
+2. Client Credentials Flow (Server-to-Server)
+---------------------------------------------
+- Use Case: Microservices communication, Cron Jobs.
+- No User Involved.
+- Service A sends client_id + client_secret → Gets Token → Calls Service B.
+
+3. Device Authorization Flow (Input Limited Devices)
+----------------------------------------------------
+- Use Case: Apple TV, YouTube on Smart TV, CLI tools.
+- Device shows a Code on screen.
+- User enters Code on Phone/Laptop browser.
+- Device keeps polling until approved.
+
+4. Implicit Flow (⚠️ DEPRECATED)
+-------------------------------
+- Old way for SPAs. Token in URL Fragment.
+- Insecure. Use Authorization Code + PKCE instead.
+
+================================================================================
+PART 4: TOKENS DEEP DIVE
+================================================================================
+
+1. Access Token
+---------------
+- Format: Usually JWT.
+- Lifetime: Short-lived (5 min - 1 hour).
+- Usage: Sent in `Authorization: Bearer <token>` header.
+- Storage: Client side (LocalStorage/Memory). Server stateless.
+
+2. Refresh Token
+----------------
+- Purpose: Get new Access Token without user re-login.
+- Lifetime: Long-lived (Days/Weeks).
+- Storage: Backend must store in Database (hashed).
+
+3. ID Token (OpenID Connect)
+----------------------------
+- Purpose: Authentication (Login) ONLY, NOT for API access.
+- Format: Always JWT.
+- Contains: User identity (name, email, sub).
+
+================================================================================
+PART 5: OPENID CONNECT (OIDC)
+================================================================================
+
+- OAuth 2.0 = Authorization (Access Delegation).
+- OIDC = Authentication (Identity) Layer on top of OAuth 2.0.
+- OIDC adds `id_token` and `/userinfo` endpoint.
+
+================================================================================
+PART 6: KEYCLOAK - INTRODUCTION
+================================================================================
+
+1. Keycloak Kya Hai?
+--------------------
+- Open Source **Identity and Access Management (IAM)** tool.
+- Works as Authorization Server (OAuth 2.0 / OIDC).
+- Features: Single Sign-On (SSO), Social Login, User Federation (LDAP/AD).
+
+2. Keycloak Components (Yaad Rakhne Layak)
+------------------------------------------
+| Component | Kaam |
+|:----------|:-----|
+| Realm | Tenant (Alag duniya). Isolates users, clients, roles. |
+| Client | Tumhara Application (Spring Boot, React). |
+| User | End User. |
+| Role | Permission. (Realm Role = Global, Client Role = App-specific). |
+| Group | Users ka collection. Group ko role assign kar sakte ho. |
+
+================================================================================
+PART 7: KEYCLOAK ENDPOINTS (BACKEND KE LIYE)
+================================================================================
+
+Base URL: http://localhost:8181/realms/{realm-name}
+
+| Endpoint | Path | Kaam |
+|:---------|:-----|:-----|
+| Discovery | `/.well-known/openid-configuration` | Metadata (Saare endpoints) |
+| Authorization | `/protocol/openid-connect/auth` | Login page URL |
+| Token | `/protocol/openid-connect/token` | Code exchange for Token |
+| JWKS | `/protocol/openid-connect/certs` | Public Keys (Signature verify) |
+| User Info | `/protocol/openid-connect/userinfo` | User profile data |
+| Introspect | `/protocol/openid-connect/token/introspect` | Opaque token validation |
+| Logout | `/protocol/openid-connect/logout` | SSO session end |
+
+================================================================================
+PART 8: SPRING BOOT INTEGRATION (RESOURCE SERVER)
+================================================================================
+
+1. Dependencies (pom.xml)
+-------------------------
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+
+
+# Auto-discovery (Recommended)
+spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8181/realms/myrealm
+
+# OR Manual JWKS URI
+# spring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://localhost:8181/realms/myrealm/protocol/openid-connect/certs
+
+
+               /* KeyCloakRoleReader */
+
+package com.springbootproject.product.security;
+
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class KeyCloakRoleReader implements Converter<Jwt, Collection<GrantedAuthority>> {
+
+    @Override
+    public Collection<GrantedAuthority> convert(Jwt source) {
+        Map<String, Object> realmAccess = (Map<String, Object>) source.getClaims().get("realm_access");
+        if (realmAccess == null || realmAccess.isEmpty()){
+            return List.of();
+        }
+
+        Collection<GrantedAuthority> returnValue = ((List<String>) realmAccess.get("roles")).stream()
+                .map(role -> "ROLE_" + role)
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+
+        return returnValue;
+
+    }
+}
+
+                                 /* Security config file*/
+ @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+        http.csrf(csrf->csrf.disable()) //// disable for post , update delete without token allow
+                .authorizeHttpRequests(request ->{  //authorizeHttpRequests -> kaun sa request allow and deny
+                    request.requestMatchers(HttpMethod.GET, "/api/**").permitAll(); // all get request allowed
+                    request.anyRequest().authenticated(); // get request ke alva sari request authenticate ho gya hai
+                }).oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                        ));
+        return http.build();
+    }
+
+
+    private Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeyCloakRoleReader());
+        return jwtAuthenticationConverter;
+    }
