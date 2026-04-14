@@ -1,0 +1,113 @@
+================================================================================
+                    LOGGING - COMPLETE NOTES WITH DEFINITIONS
+================================================================================
+
+1. LOGGING KYA HAI? (DEFINITION)
+--------------------------------
+Definition: Logging ek process hai jisme application apne execution ke dauraan
+jo bhi kaam karti hai (Events, Errors, Warnings), uski jaankari ko ek specific
+format mein record karti hai (Console ya File mein).
+
+Simple Words: Application ki **Diary** likhna.
+
+2. LOGGER KYA HAI? (DEFINITION)
+-------------------------------
+Definition: Logger ek object hai jo application ke code mein log messages ko
+likhne (publish) ke liye use hota hai. Ye SLF4J ya Log4j jaise frameworks se aata hai.
+
+Example: `private static final Logger log = LoggerFactory.getLogger(MyClass.class);`
+
+3. LOG LEVEL KYA HAI? (DEFINITION)
+----------------------------------
+Definition: Log Level ek tag/value hoti hai jo batati hai ki current log message
+kitna important hai. Isi ke hisaab se decide hota hai ki log message ko print
+karna hai ya ignore karna hai (Filtering).
+
+Levels (Severity ke hisaab se ascending):
+- **TRACE** : Sabse zyada detailed info (Har line ka execution). Development ke liye.
+- **DEBUG** : Variables ki values, Method entry/exit. Debugging ke liye.
+- **INFO**  : Normal application flow (e.g., "User Login Successful"). Production Default.
+- **WARN**  : Potential issue (e.g., "Memory usage is high"). Future error ka indication.
+- **ERROR** : Actual failure (e.g., "Database Connection Lost"). Action required.
+
+4. APPENDER KYA HAI? (DEFINITION)
+---------------------------------
+Definition: Appender ek component hai jo decide karta hai ki **Logs kahan bheje jayenge**.
+Ye Destination set karta hai.
+
+Types of Appenders:
+- **ConsoleAppender** : Logs ko Command Line / Terminal / IDE Console mein print karta hai.
+- **FileAppender**   : Logs ko ek specific file mein likhta hai (e.g., `app.log`).
+- **RollingFileAppender** : Jab file size badi ho jaye ya din badle, toh purani file archive
+                    kar deta hai aur nayi file bana deta hai.
+
+5. LAYOUT / PATTERN KYA HAI? (DEFINITION)
+-----------------------------------------
+Definition: Pattern batata hai ki **Log Line ka Format kaisa dikhega**.
+Jaise ki time pehle aaye, level baad mein aaye.
+
+Example Pattern: `%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n`
+- `%d` : Date & Time
+- `%thread` : Thread Name (e.g., http-nio-8080-exec-1)
+- `%level` : INFO/ERROR/WARN
+- `%logger` : Class name jisne log kiya
+- `%msg` : Actual message tumne jo likha
+- `%n` : New Line (Enter)
+
+6. SLF4J KYA HAI? (DEFINITION)
+------------------------------
+Definition: Simple Logging Facade for Java (SLF4J) ek **Abstraction Layer** hai.
+Ye sirf Interface provide karta hai. Actual implementation tum Logback ya Log4j2 se karte ho.
+Fayda: Bina code change kiye tum log library badal sakte ho.
+
+7. LOGBACK vs LOG4J2 (DIFFERENCE)
+---------------------------------
+- **Logback** : Spring Boot ka Default. XML based config. General purpose ke liye best.
+- **Log4j2**  : High performance, Async logging support better hai. Agar bohot zyada traffic hai toh ye use karo.
+
+8. MDC (MAPPED DIAGNOSTIC CONTEXT) - DEFINITION
+-----------------------------------------------
+Definition: MDC ek **Thread-Local Map** hai jisme tum custom key-value pairs daal sakte ho
+(e.g., `userId`, `requestId`). Ye values automatically har log line ke saath print ho jaati hain,
+jisse ek hi user ki saari requests ko filter karna aasan ho jata hai.
+
+9. ROOT LOGGER KYA HAI?
+-----------------------
+Definition: Ye **Parent Logger** hai. Agar kisi specific class ke liye tumne level set nahi kiya,
+toh ye Root Logger ki settings inherit kar leta hai. Isme tum Global Level aur Global Appenders set karte ho.
+
+10. LOG ROTATION KYA HAI?
+-------------------------
+Definition: Log files ko manage karne ki technique. Agar ye na ho toh `app.log` 10GB ki ho jayegi.
+Rotation automatically purani file ko `app.2026-04-01.log` rename kar deta hai ya delete kar deta hai.
+- **TimeBasedRollingPolicy** : Har roz nayi file.
+- **SizeBasedTriggeringPolicy** : 10MB hone par nayi file.
+
+
+<configuration>
+    <!-- ConsoleAppender -> Print on console  -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- RollingFileAppender -> Create file name with app.log and all logs print in app.log file  -->
+    <appender name="File" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Level what u want  -->
+    <root level="INFO">
+        <appender-ref ref="File" />
+        <appender-ref ref="Console" />
+    </root>
+
+</configuration>
