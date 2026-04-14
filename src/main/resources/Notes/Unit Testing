@@ -1,0 +1,353 @@
+Bilkul bhai. **Unit Testing** shuru karte hain. Bilkul basic se lekar advanced tak. Koi point miss nahi hoga. Hinglish mein, copy-paste format mein.
+
+---
+
+```
+================================================================================
+                    UNIT TESTING - COMPLETE NOTES (ZERO TO HERO)
+================================================================================
+
+PART 1: UNIT TESTING KYA HAI? (DEFINITION)
+------------------------------------------
+Definition: Unit Testing ek software testing method hai jisme application ke
+**smallest testable parts** (individual methods/classes) ko **isolation** mein
+test kiya jata hai.
+
+Simple Words: Ek-ek method ko alag se check karna ki woh sahi kaam kar raha hai ya nahi.
+
+PART 2: UNIT TESTING KYUN KARTE HAIN? (BENEFITS)
+------------------------------------------------
+1. **Bugs Jaldi Pakadna:** Development ke time hi error mil jata hai.
+2. **Refactoring Safe:** Code improve karte waqt pata chal jata hai kuch tuta toh nahi.
+3. **Documentation:** Test cases batate hain ki method ka expected behavior kya hai.
+4. **Confidence:** Production deploy karne se pehle sure ho jate ho ki sab sahi hai.
+5. **Time Saving:** Baad mein debugging ka time bachta hai.
+
+PART 3: TYPES OF TESTING (PYRAMID)
+----------------------------------
+     ┌─────────────┐
+     │     E2E     │  (End-to-End) - Sabse kam, Sabse slow
+     ├─────────────┤
+     │ Integration │  (Services + DB) - Medium
+     ├─────────────┤
+     │    UNIT     │  (Single Method) - Sabse zyada, Sabse fast
+     └─────────────┘
+
+PART 4: JUNIT KYA HAI?
+----------------------
+Definition: JUnit Java ke liye ek **Unit Testing Framework** hai.
+Ye annotations provide karta hai test methods likhne ke liye.
+Spring Boot default JUnit 5 (Jupiter) use karta hai.
+
+Dependency (Spring Boot already included):
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+PART 5: JUNIT 5 ANNOTATIONS (SABSE IMPORTANT)
+---------------------------------------------
+| Annotation | Kaam (Definition) |
+|:-----------|:------------------|
+| `@Test` | Ye method ek Test Case hai |
+| `@BeforeEach` | **Har Test se pehle** run hoga (Object setup) |
+| `@AfterEach` | **Har Test ke baad** run hoga (Cleanup) |
+| `@BeforeAll` | **Saare Tests se pehle EK BAAR** run hoga (Static hona chahiye) |
+| `@AfterAll` | **Saare Tests ke baad EK BAAR** run hoga (Static) |
+| `@DisplayName` | Test ka custom naam (Console/Report mein dikhega) |
+| `@Disabled` | Test temporarily skip karna |
+| `@ParameterizedTest` | Same test multiple inputs ke saath run karna |
+| `@RepeatedTest` | Test ko multiple baar run karna |
+
+PART 6: ASSERTIONS (VERIFICATION)
+---------------------------------
+Definition: Assertion ek statement hai jo check karta hai ki **Expected Result**
+aur **Actual Result** same hain ya nahi.
+
+| Method | Kaam |
+|:-------|:-----|
+| `assertEquals(expected, actual)` | Dono values equal hain? |
+| `assertNotEquals(unexpected, actual)` | Values equal nahi honi chahiye |
+| `assertTrue(condition)` | Condition true hai? |
+| `assertFalse(condition)` | Condition false hai? |
+| `assertNull(object)` | Object null hai? |
+| `assertNotNull(object)` | Object null nahi hai? |
+| `assertThrows(Exception.class, () -> {...})` | Code ne expected Exception throw ki? |
+| `assertAll(() -> {...}, () -> {...})` | Saare assertions ek saath check karo |
+
+PART 7: BASIC UNIT TEST EXAMPLE (SERVICE LAYER)
+-----------------------------------------------
+```java
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CalculatorTest {
+
+    private Calculator calculator;
+
+    @BeforeEach
+    void setUp() {
+        calculator = new Calculator(); // Har test se pehle naya object
+        System.out.println("Setup complete");
+    }
+
+    @Test
+    @DisplayName("Addition of two positive numbers")
+    void testAddition() {
+        // Arrange (Setup)
+        int a = 5;
+        int b = 3;
+
+        // Act (Action)
+        int result = calculator.add(a, b);
+
+        // Assert (Verify)
+        assertEquals(8, result, "5 + 3 should be 8");
+    }
+
+    @Test
+    @DisplayName("Division by zero should throw exception")
+    void testDivisionByZero() {
+        // Assert
+        assertThrows(ArithmeticException.class, () -> {
+            calculator.divide(10, 0);
+        });
+    }
+
+    @AfterEach
+    void tearDown() {
+        calculator = null;
+        System.out.println("Cleanup done");
+    }
+}
+```
+
+PART 8: AAA PATTERN (ARRANGE-ACT-ASSERT)
+----------------------------------------
+Har test method teen parts mein divide hona chahiye:
+
+1. **Arrange:** Test data setup karo, objects banao.
+2. **Act:** Actual method call karo jisko test karna hai.
+3. **Assert:** Result verify karo.
+
+```java
+@Test
+void testFindUserById() {
+    // 1. Arrange
+    Long userId = 1L;
+    User expectedUser = new User(1L, "rahul");
+    when(userRepository.findById(userId)).thenReturn(Optional.of(expectedUser));
+
+    // 2. Act
+    User actualUser = userService.findUserById(userId);
+
+    // 3. Assert
+    assertEquals(expectedUser.getUsername(), actualUser.getUsername());
+}
+```
+
+PART 9: MOCKITO KYA HAI? (MOCKING FRAMEWORK)
+--------------------------------------------
+Definition: Mockito ek **Mocking Framework** hai jo **Fake Objects** banata hai.
+Jab tumhe Database, External API, ya doosri classes ko test se **isolate** karna ho.
+
+Important Annotations:
+| Annotation | Kaam |
+|:-----------|:-----|
+| `@Mock` | Fake object banata hai (Dependency) |
+| `@InjectMocks` | Real object banata hai + usme `@Mock` wale inject karta hai |
+| `@ExtendWith(MockitoExtension.class)` | Mockito enable karta hai (JUnit 5) |
+
+PART 10: MOCKITO EXAMPLE (SERVICE + REPOSITORY)
+-----------------------------------------------
+```java
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import java.util.Optional;
+
+@ExtendWith(MockitoExtension.class)  // Mockito enable
+class UserServiceTest {
+
+    @Mock  // Fake Repository
+    private UserRepository userRepository;
+
+    @InjectMocks  // Real Service with Fake Repository injected
+    private UserService userService;
+
+    @Test
+    void testGetUserByUsername_Success() {
+        // 1. Arrange
+        String username = "rahul";
+        User mockUser = new User(1L, "rahul", "rahul@gmail.com");
+
+        // Jab bhi repository call ho, fake response do (DB call nahi hogi)
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(mockUser));
+
+        // 2. Act
+        User foundUser = userService.getUserByUsername(username);
+
+        // 3. Assert
+        assertNotNull(foundUser);
+        assertEquals("rahul", foundUser.getUsername());
+
+        // 4. Verify (Check karo ki repository method call hua ya nahi)
+        verify(userRepository, times(1)).findByUsername(username);
+    }
+
+    @Test
+    void testGetUserByUsername_NotFound() {
+        // Arrange
+        String username = "unknown";
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(UsernameNotFoundException.class, () -> {
+            userService.getUserByUsername(username);
+        });
+    }
+}
+```
+
+PART 11: MOCKITO KEY METHODS
+----------------------------
+| Method | Kaam |
+|:-------|:-----|
+| `when(mock.method()).thenReturn(value)` | Fake response set karna |
+| `when(mock.method()).thenThrow(exception)` | Fake exception throw karna |
+| `verify(mock, times(n)).method()` | Check karna method `n` baar call hua |
+| `verify(mock, never()).method()` | Check karna method kabhi call nahi hua |
+| `ArgumentCaptor.forClass()` | Method ko kis argument se call kiya, capture karna |
+
+PART 12: CONTROLLER LAYER TESTING (@WebMvcTest)
+-----------------------------------------------
+Definition: `@WebMvcTest` sirf **Web Layer** (Controllers) ko test karta hai.
+Service aur Repository layers ko **Mock** karna padta hai. Ye lightweight hota hai.
+
+```java
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(ProductController.class)
+class ProductControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;  // Fake HTTP requests bhejne ke liye
+
+    @MockBean  // Service ko mock karo (Controller depends on Service)
+    private ProductService productService;
+
+    @Test
+    void testGetProductById_Success() throws Exception {
+        // Arrange
+        Long productId = 1L;
+        Product mockProduct = new Product(productId, "Laptop", 50000);
+        when(productService.getProductById(productId)).thenReturn(mockProduct);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/products/{id}", productId))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.name").value("Laptop"))
+               .andExpect(jsonPath("$.price").value(50000));
+    }
+
+    @Test
+    void testGetProductById_NotFound() throws Exception {
+        // Arrange
+        Long productId = 99L;
+        when(productService.getProductById(productId)).thenThrow(new ProductNotFoundException());
+
+        // Act & Assert
+        mockMvc.perform(get("/api/products/{id}", productId))
+               .andExpect(status().isNotFound());
+    }
+}
+```
+
+PART 13: REPOSITORY LAYER TESTING (@DataJpaTest)
+------------------------------------------------
+Definition: `@DataJpaTest` sirf **JPA Components** (Repository) ko test karta hai.
+Ye **In-Memory Database** (H2) use karta hai, Real DB nahi.
+
+```java
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Optional;
+
+@DataJpaTest
+class UserRepositoryTest {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Test
+    void testFindByUsername_Success() {
+        // Arrange
+        User user = new User(null, "rahul", "password");
+        userRepository.save(user);
+
+        // Act
+        Optional<User> found = userRepository.findByUsername("rahul");
+
+        // Assert
+        assertThat(found).isPresent();
+        assertThat(found.get().getUsername()).isEqualTo("rahul");
+    }
+}
+```
+
+PART 14: TEST COVERAGE KYA HAI?
+-------------------------------
+Definition: Code Coverage batata hai ki tumhare **kitne percentage code** ko
+tests ne execute kiya. Jaise 80% coverage matlab 80% lines of code tests run hui.
+
+Types of Coverage:
+- **Line Coverage:** Kitni lines execute hui.
+- **Branch Coverage:** Kitne `if-else` branches cover hue.
+
+IntelliJ Mein Coverage Run Karna:
+- Right Click on Test Class → **Run 'ClassName' with Coverage**.
+
+PART 15: BEST PRACTICES
+-----------------------
+1. **F.I.R.S.T Principle:**
+   - **F**ast: Tests jaldi run hone chahiye.
+   - **I**ndependent: Tests ek doosre pe depend na karein.
+   - **R**epeatable: Kitni bhi baar run karo, same result.
+   - **S**elf-Validating: Automatic pass/fail, manual check nahi.
+   - **T**imely: Code likhte waqt hi test likho (TDD).
+
+2. **One Assert Per Test:** Ek test mein ek hi cheez verify karo.
+3. **Meaningful Names:** `testAddition` nahi, `shouldReturnSumWhenTwoPositiveNumbersAdded` likho.
+4. **Don't Test External Libraries:** Spring Boot, Hibernate already tested hain.
+5. **Avoid Logic in Tests:** `if-else` test mein mat dalo.
+
+PART 16: COMMON ANNOTATIONS CHEAT SHEET
+---------------------------------------
+| Annotation | Layer | Kaam |
+|:-----------|:------|:-----|
+| `@SpringBootTest` | Integration | Poora Application Context load karta hai |
+| `@WebMvcTest` | Controller | Sirf Web Layer test |
+| `@DataJpaTest` | Repository | Sirf JPA Layer test |
+| `@MockBean` | Any | Spring Context mein Fake Bean add karta hai |
+| `@SpyBean` | Any | Real Bean wrap karta hai (Partial Mock) |
+| `@TestPropertySource` | Any | Test ke liye custom properties |
+
+================================================================================
+                                    END
+================================================================================
+```
