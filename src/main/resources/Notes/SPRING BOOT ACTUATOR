@@ -1,0 +1,93 @@
+================================================================================
+                    SPRING BOOT ACTUATOR - COMPLETE NOTES
+================================================================================
+
+PART 1: ACTUATOR KYA HAI? (DEFINITION)
+--------------------------------------
+Definition: Actuator Spring Boot ka ek **Production-Ready Features** ka set hai.
+Ye aapke application ki **Monitoring** aur **Management** ke liye ready-made
+HTTP endpoints aur MBeans provide karta hai.
+
+Simple Words: Application ki **Health Report** aur **Internal Info** dekhne ka tool.
+
+PART 2: ACTUATOR KYUN USE KARTE HAIN? (USE CASES)
+-------------------------------------------------
+1. **Health Check:** Kya application chal rahi hai? Database connection alive hai?
+2. **Metrics:** Kitne requests aaye? Response time kitna hai? Memory usage kitni hai?
+3. **Info:** Application ka version kya hai? Custom build info.
+4. **Environment:** `application.properties` ki kaunsi values active hain?
+5. **Loggers:** Runtime pe log level change karna (DEBUG se ERROR).
+6. **Thread Dump:** Deadlock detect karna.
+7. **Heap Dump:** Memory leak analyze karna.
+
+PART 3: DEPENDENCY (pom.xml)
+----------------------------
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+
+
+Default Base Path: /actuator
+
+Endpoint	URL	Kaam (Definition)
+health	     /actuator/health	    Application ki current status. UP ya DOWN.
+info	     /actuator/info	        Custom application information (version, description).
+metrics	     /actuator/metrics	    Performance stats (CPU, Memory, HTTP Requests).
+env	         /actuator/env	        Environment properties aur Configuration values.
+loggers	      /actuator/loggers	    Runtime pe Log Levels check/change karna.
+beans	      /actuator/beans	    Spring Context mein registered saare Beans ki list.
+threaddump	 /actuator/threaddump	Sabhi Threads ka snapshot (Deadlock check).
+heapdump	 /actuator/heapdump	    Memory ka snapshot (.hprof file download).
+mappings	 /actuator/mappings	    Saare @RequestMapping paths ki list.
+
+
+
+# 1. Sabhi Endpoints Enable Karna (By Default sirf /health hi open hota hai)
+management.endpoints.web.exposure.include=*
+# Specific enable karna: health,info,metrics
+
+# 2. Specific Endpoint Disable Karna
+management.endpoint.shutdown.enabled=true
+management.endpoint.env.enabled=false
+
+# 3. Custom Base Path (Default /actuator hai)
+management.endpoints.web.base-path=/monitor
+
+# 4. Port Change Karna (Security: Actuator alag port pe sunega)
+management.server.port=8081
+
+# 5. Health Check Mein Details Show Karna (By default sirf Status aata hai)
+management.endpoint.health.show-details=always
+management.endpoint.health.show-components=always
+
+
+info.app.name=My Cool App
+info.app.version=2.0.1
+info.app.description=This is a product management system.
+info.java.version=@java.version@  # Maven/Gradle se dynamic
+
+
+      -> Custom Actuator
+package com.springbootproject.product.controller;
+
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
+import org.springframework.stereotype.Component;
+
+@Component
+@Endpoint(id = "custom")
+public class CustomEndpoint {
+
+// url ->  localhost:8080/actuator/custom
+    @ReadOperation
+    public String getCustom(){
+        return "this is Custom Endpoint";
+    }
+}
+
+
+=> ek baat or if u use authentication than u allow to actuator url
+request.requestMatchers("/actuator/**").permitAll();
