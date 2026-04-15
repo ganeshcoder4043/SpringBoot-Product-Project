@@ -1,0 +1,337 @@
+Ye lo bhai! Tumne jo poochha tha — **Har sub-topic ka deep checklist format**. Isse tum easily tick mark laga sakte ho aur track kar sakte ho ki kya complete hai aur kya pending hai.
+
+Isme koi bhi point missing nahi hai. Copy karo, print nikalo, ya Google Docs mein rakh lo.
+
+---
+
+## 📋 ULTIMATE JAVA BACKEND DEVELOPER CHECKLIST
+
+### ☕ 1. CORE JAVA
+
+**1.1 Basics**
+- [ ] JVM, JRE, JDK Architecture (Difference & Flow)
+- [ ] `main()` method signature (`public static void main(String[] args)`)
+- [ ] Primitive Data Types (byte, short, int, long, float, double, char, boolean)
+- [ ] Reference Data Types (String, Arrays, Classes)
+- [ ] Implicit Type Casting (Widening)
+- [ ] Explicit Type Casting (Narrowing)
+- [ ] Arithmetic Operators (`+`, `-`, `*`, `/`, `%`)
+- [ ] Logical Operators (`&&`, `||`, `!`)
+- [ ] Bitwise Operators (`&`, `|`, `^`, `~`, `<<`, `>>`)
+- [ ] Ternary Operator (`condition ? true : false`)
+
+**1.2 OOPs Concepts**
+- [ ] Encapsulation: `private` fields with `public` getters/setters
+- [ ] Inheritance: `extends` keyword, `super()` constructor chaining
+- [ ] Method Overriding rules (@Override annotation)
+- [ ] Polymorphism: Method Overloading (Compile-time)
+- [ ] Polymorphism: Method Overriding (Runtime)
+- [ ] Abstraction: Abstract class (0-100% abstraction)
+- [ ] Abstraction: Interface (100% abstraction, Java 8+ default/static methods)
+- [ ] `final` keyword (Variable = Constant, Method = No Override, Class = No Inheritance)
+- [ ] `static` keyword (Variable = Class level, Method, Block, Nested Class)
+
+**1.3 Strings**
+- [ ] String Immutability (Why? Security, String Pool, Thread Safety)
+- [ ] String Pool Concept (Heap vs Pool)
+- [ ] `StringBuilder` (Mutable, Not Thread-safe, Fast)
+- [ ] `StringBuffer` (Mutable, Thread-safe, Slow)
+- [ ] String methods: `split()`, `substring()`, `replace()`, `trim()`, `toUpperCase()`
+
+**1.4 Arrays**
+- [ ] 1D Array Declaration & Initialization
+- [ ] 2D Array (Matrix) Traversal
+- [ ] `Arrays` utility class (`sort()`, `binarySearch()`, `copyOf()`)
+
+**1.5 Exception Handling**
+- [ ] Checked Exceptions (Compile-time, e.g., `IOException`)
+- [ ] Unchecked Exceptions (Runtime, e.g., `NullPointerException`)
+- [ ] `try-catch-finally` block flow
+- [ ] **try-with-resources** (AutoCloseable interface)
+- [ ] `throw` vs `throws` keyword
+- [ ] Custom Exception class creation
+
+**1.6 Collections Framework**
+- [ ] **List:** `ArrayList` internal working (Dynamic Array)
+- [ ] **List:** `LinkedList` internal working (Doubly Linked List)
+- [ ] **Set:** `HashSet` (Hashing, No Duplicates)
+- [ ] **Set:** `LinkedHashSet` (Insertion Order)
+- [ ] **Set:** `TreeSet` (Sorted Order, Red-Black Tree)
+- [ ] **Map:** `HashMap` Internal Working (Hashing, Buckets, Collision - Linked List/Tree)
+- [ ] **Map:** `LinkedHashMap` (Insertion/Access Order)
+- [ ] **Map:** `TreeMap` (Sorted Keys)
+- [ ] **Queue:** `PriorityQueue` (Min-Heap)
+- [ ] **Queue:** `ArrayDeque` (Double-ended queue)
+- [ ] `Collections` utility class (`sort`, `reverse`, `synchronizedList`)
+- [ ] **Fail-Fast vs Fail-Safe** Iterators
+- [ ] `Comparable` (Natural Order) vs `Comparator` (Custom Order)
+
+**1.7 Multithreading & Concurrency**
+- [ ] Thread Creation: Extending `Thread` class
+- [ ] Thread Creation: Implementing `Runnable` interface
+- [ ] Thread Lifecycle: New -> Runnable -> Running -> Blocked/Waiting -> Terminated
+- [ ] `synchronized` method (Object-level lock)
+- [ ] `synchronized` block (Reduced waiting time)
+- [ ] `volatile` keyword (Visibility guarantee, No Caching)
+- [ ] `wait()`, `notify()`, `notifyAll()` (Inter-thread communication)
+- [ ] **Executor Framework:** `ExecutorService`, `Executors` factory
+- [ ] **Executor Framework:** `ThreadPoolExecutor` (CorePoolSize, MaxPoolSize, Queue)
+- [ ] **Locks:** `ReentrantLock` (Explicit Locking)
+- [ ] **Concurrent Collections:** `ConcurrentHashMap` (Segment/Bucket level locking)
+- [ ] **Concurrent Collections:** `CopyOnWriteArrayList`
+
+**1.8 Java 8 Features (Crucial)**
+- [ ] **Lambda Expressions:** Syntax `(parameters) -> expression`
+- [ ] **Functional Interface:** `Predicate<T>` (test), `Function<T,R>` (apply)
+- [ ] **Functional Interface:** `Consumer<T>` (accept), `Supplier<T>` (get)
+- [ ] **Stream API:** `filter()` (Intermediate), `map()` (Transformation)
+- [ ] **Stream API:** `flatMap()` (Flattening)
+- [ ] **Stream API:** `collect(Collectors.toList())` (Terminal)
+- [ ] **Stream API:** `reduce()` (Aggregation)
+- [ ] **Stream API:** `groupingBy()` (SQL GROUP BY)
+- [ ] **Optional:** `ofNullable()`, `orElse()`, `orElseThrow()`, `map()`
+- [ ] **Method Reference:** `System.out::println`, `ClassName::new`
+- [ ] **Date/Time API:** `LocalDate`, `LocalTime`, `LocalDateTime`, `ZonedDateTime`
+
+**1.9 File I/O & Serialization**
+- [ ] `FileInputStream` / `FileOutputStream` (Byte Stream)
+- [ ] `BufferedReader` / `BufferedWriter` (Character Stream, Efficient)
+- [ ] **NIO:** `Path` interface, `Files` utility class (`readAllLines`, `write`)
+- [ ] **Serialization:** `Serializable` interface (Marker)
+- [ ] `serialVersionUID` importance
+- [ ] `transient` keyword (Skip serialization)
+
+**1.10 JDBC**
+- [ ] Driver Loading (`Class.forName` or ServiceLoader)
+- [ ] `Connection`, `Statement`, `PreparedStatement` (Prevents SQL Injection)
+- [ ] `ResultSet` (Forward only, Updatable)
+- [ ] Transaction Management (`conn.setAutoCommit(false)`, `commit()`, `rollback()`)
+- [ ] Connection Pooling Concept (HikariCP, C3P0)
+
+---
+
+### 🌱 2. SPRING & SPRING BOOT
+
+**2.1 Spring Core**
+- [ ] **IoC Container:** `BeanFactory` (Lazy) vs `ApplicationContext` (Eager)
+- [ ] **Dependency Injection:** Constructor Injection (Recommended, Immutability)
+- [ ] **Dependency Injection:** Setter Injection (Optional dependencies)
+- [ ] **Dependency Injection:** Field Injection (`@Autowired` - Avoid in production)
+- [ ] Bean Scopes: `singleton` (Default), `prototype` (New instance every time)
+- [ ] Bean Lifecycle: `@PostConstruct` (Init), `@PreDestroy` (Destroy)
+- [ ] `@Configuration` & `@Bean` (Java-based config)
+- [ ] Stereotype Annotations: `@Component`, `@Service`, `@Repository`, `@Controller`
+- [ ] `@Value` (Property injection) & `@PropertySource`
+- [ ] Spring Expression Language (SpEL) basics
+
+**2.2 Spring Boot**
+- [ ] Auto-Configuration (`@SpringBootApplication`, `@EnableAutoConfiguration`)
+- [ ] Starter Dependencies (`spring-boot-starter-web`, `-data-jpa`, `-security`)
+- [ ] `application.properties` vs `application.yml`
+- [ ] Spring Profiles (`@Profile`, `spring.profiles.active=dev`)
+- [ ] `CommandLineRunner` & `ApplicationRunner`
+- [ ] Spring Boot DevTools (Automatic Restart)
+
+**2.3 Spring MVC**
+- [ ] `DispatcherServlet` workflow (Front Controller Pattern)
+- [ ] `@RestController` (JSON) vs `@Controller` (View)
+- [ ] Request Mapping: `@RequestMapping`, `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`
+- [ ] Parameter Annotations: `@PathVariable`, `@RequestParam`, `@RequestBody`, `@ModelAttribute`
+- [ ] `ResponseEntity<T>` (Building HTTP responses)
+- [ ] Global Exception Handling: `@ControllerAdvice` / `@RestControllerAdvice` + `@ExceptionHandler`
+- [ ] Interceptors (`HandlerInterceptor` - Pre/Post processing)
+
+**2.4 Spring Data JPA**
+- [ ] Entity Mapping: `@Entity`, `@Table`, `@Id`, `@GeneratedValue`
+- [ ] Repositories: `CrudRepository`, `JpaRepository`, `PagingAndSortingRepository`
+- [ ] Query Methods: `findByFirstNameAndLastName`, `existsByEmail`
+- [ ] `@Query` (JPQL) and Native Queries (`nativeQuery=true`)
+- [ ] Relationships: `@OneToOne`, `@OneToMany`, `@ManyToOne`, `@ManyToMany`
+- [ ] **Fetch Types:** `LAZY` (Proxy, Most Common) vs `EAGER` (Immediate)
+- [ ] **Cascade Types:** `ALL`, `PERSIST`, `MERGE`, `REMOVE`, `DETACH`
+- [ ] Pagination & Sorting: `Pageable` interface, `Sort` class
+
+**2.5 Spring Security**
+- [ ] **Authentication** (Who you are) vs **Authorization** (What you can do)
+- [ ] Security Filter Chain (`SecurityFilterChain` Bean)
+- [ ] `UserDetailsService` (Load user from DB) & `UserDetails` (User object)
+- [ ] Password Encoding (`BCryptPasswordEncoder` - Strength 10+)
+- [ ] JWT Authentication Flow (Filter, Provider, Token Validation)
+- [ ] Method Security: `@PreAuthorize("hasRole('ADMIN')")`, `@PostAuthorize`, `@Secured`
+- [ ] CORS Configuration (`.cors()`) and CSRF Disable for Stateless APIs
+
+**2.6 Spring AOP**
+- [ ] Cross-Cutting Concerns: Logging, Performance Tracking, Transaction Management
+- [ ] Aspect: `@Aspect` class
+- [ ] Advice Annotations: `@Before`, `@After`, `@Around`, `@AfterReturning`, `@AfterThrowing`
+- [ ] `JoinPoint` (Access method signature) & `ProceedingJoinPoint` (Control execution)
+- [ ] Pointcut Expressions: `execution(* com.example.service.*.*(..))`
+
+---
+
+### 🔐 3. SECURITY & AUTHENTICATION
+
+**3.1 JWT**
+- [ ] Structure: **Header** (Algorithm), **Payload** (Claims), **Signature** (Verification)
+- [ ] Token Generation & Validation (using `jjwt` library)
+- [ ] Refresh Token Strategy (Long-lived, Stored securely)
+- [ ] Token Blacklisting / Logout (Stateless JWT challenge)
+
+**3.2 OAuth 2.0**
+- [ ] Grant Types: Authorization Code (Web), Client Credentials (Server-to-Server)
+- [ ] PKCE Flow (For Mobile/SPA)
+- [ ] Roles: Resource Owner, Client, Authorization Server, Resource Server
+- [ ] Access Token (Short-lived) vs Refresh Token (Long-lived)
+
+**3.3 OpenID Connect (OIDC)**
+- [ ] ID Token (JWT containing user identity)
+- [ ] `/userinfo` Endpoint (Retrieve user details)
+- [ ] Standard Claims (`sub`, `email`, `email_verified`, `name`)
+
+**3.4 Keycloak**
+- [ ] Realm Configuration (Isolated tenant)
+- [ ] Client Management (Confidential vs Public)
+- [ ] User & Role Management (Realm Roles vs Client Roles)
+- [ ] Identity Brokering (Login with Google via Keycloak)
+- [ ] Spring Boot Integration (`issuer-uri` property)
+- [ ] Role Extraction (`realm_access` and `resource_access` from JWT)
+
+---
+
+### 🧪 4. TESTING
+
+**4.1 JUnit 5**
+- [ ] Lifecycle Annotations: `@BeforeEach`, `@AfterEach`, `@BeforeAll`, `@AfterAll`
+- [ ] Core Annotations: `@Test`, `@DisplayName`, `@Disabled`
+- [ ] Assertions: `assertEquals()`, `assertTrue()`, `assertNotNull()`, `assertThrows()`, `assertAll()`
+- [ ] Parameterized Tests: `@ParameterizedTest`, `@ValueSource`, `@CsvSource`
+
+**4.2 Mockito**
+- [ ] Initialization: `@ExtendWith(MockitoExtension.class)`
+- [ ] Mocking: `@Mock` (Dependency), `@InjectMocks` (Class Under Test)
+- [ ] Stubbing: `when(mock.method()).thenReturn(value)`, `thenThrow()`
+- [ ] Verification: `verify(mock, times(1)).method()`, `never()`
+- [ ] Argument Capture: `ArgumentCaptor<T>`
+
+**4.3 Spring Boot Testing**
+- [ ] Integration Testing: `@SpringBootTest` (Loads full context)
+- [ ] Web Layer Testing: `@WebMvcTest` + `MockMvc`
+- [ ] Data Layer Testing: `@DataJpaTest` + H2 Database
+- [ ] Mocking Beans: `@MockBean`, `@SpyBean`
+
+---
+
+### 📊 5. DATABASE & SQL
+
+- [ ] **ACID Properties** (Atomicity, Consistency, Isolation, Durability)
+- [ ] Normalization: 1NF (Atomicity), 2NF (Partial Dependency), 3NF (Transitive Dependency)
+- [ ] **Indexes:** Clustered vs Non-Clustered, B-Tree Structure
+- [ ] **Joins:** INNER, LEFT, RIGHT, FULL OUTER, SELF, CROSS
+- [ ] Subqueries (Nested SELECT) & Correlated Subqueries
+- [ ] Views (Virtual Table) & Materialized Views (Physical Copy)
+- [ ] Stored Procedures & Functions (Difference)
+- [ ] Triggers (BEFORE/AFTER INSERT/UPDATE/DELETE)
+- [ ] **Transaction Isolation Levels:** READ_UNCOMMITTED, READ_COMMITTED, REPEATABLE_READ, SERIALIZABLE
+- [ ] **Window Functions:** `ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`, `LEAD()`, `LAG()`
+
+---
+
+### 🐳 6. DEVOPS & TOOLS
+
+**6.1 Docker**
+- [ ] `Dockerfile` commands: `FROM`, `WORKDIR`, `COPY`, `RUN`, `EXPOSE`, `CMD`, `ENTRYPOINT`
+- [ ] `docker-compose.yml` (Multi-container setup)
+- [ ] Image (Class) vs Container (Object)
+- [ ] Volumes (Persisting Data) & Bind Mounts (Hot Reload)
+- [ ] Docker Networks (Bridge, Host)
+
+**6.2 Git**
+- [ ] Basic Workflow: `clone`, `add`, `commit`, `push`, `pull`, `fetch`
+- [ ] Branching & Merging: `branch`, `checkout`, `merge` (Fast-Forward vs 3-Way)
+- [ ] Rebasing (`rebase` - Clean history)
+- [ ] Stashing (`stash`, `stash pop`, `stash apply`)
+- [ ] Resolving Merge Conflicts
+- [ ] Undoing Changes: `git reset`, `git revert`, `git reflog`
+
+**6.3 Maven**
+- [ ] `pom.xml` structure (`groupId`, `artifactId`, `version`, `packaging`)
+- [ ] Dependency Scopes: `compile`, `runtime`, `test`, `provided`
+- [ ] Build Lifecycle Phases: `clean`, `compile`, `test`, `package`, `install`, `deploy`
+- [ ] Plugins (e.g., `spring-boot-maven-plugin`, `jacoco-maven-plugin`)
+
+**6.4 Logging & Monitoring**
+- [ ] SLF4J (Facade) + Logback (Implementation)
+- [ ] Log Levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
+- [ ] MDC (Mapped Diagnostic Context) - Adding `userId`/`requestId` to logs
+- [ ] Spring Boot Actuator Endpoints (`/health`, `/metrics`, `/env`, `/loggers`)
+
+**6.5 Postman**
+- [ ] Collections & Folders
+- [ ] Environment Variables (e.g., `{{base_url}}`)
+- [ ] Pre-request Scripts (Setting headers dynamically)
+- [ ] Test Scripts (Automated assertion `pm.test()`)
+
+---
+
+### 📦 7. MESSAGE BROKERS (Intermediate)
+
+- [ ] **Kafka:** Broker, Topic, Partition, Producer, Consumer, Consumer Group, Offset
+- [ ] **RabbitMQ:** Producer, Exchange (Direct, Topic, Fanout, Headers), Queue, Binding, Consumer
+
+---
+
+### 🧠 8. DESIGN PATTERNS & PRINCIPLES
+
+**8.1 SOLID Principles**
+- [ ] **S**ingle Responsibility Principle (SRP)
+- [ ] **O**pen/Closed Principle (OCP)
+- [ ] **L**iskov Substitution Principle (LSP)
+- [ ] **I**nterface Segregation Principle (ISP)
+- [ ] **D**ependency Inversion Principle (DIP)
+
+**8.2 Design Patterns**
+- [ ] **Singleton:** Double-Checked Locking, Bill Pugh (Holder)
+- [ ] **Factory:** Create objects without specifying exact class
+- [ ] **Builder:** Lombok `@Builder`, Fluent API for object creation
+- [ ] **Adapter:** Connecting incompatible interfaces (e.g., `InputStreamReader`)
+- [ ] **Decorator:** Adding behavior dynamically (e.g., `BufferedReader`)
+- [ ] **Observer:** Event handling (e.g., `ApplicationEventPublisher`)
+- [ ] **Strategy:** Runtime algorithm selection (e.g., `Comparator`)
+- [ ] **Template Method:** Defining skeleton of algorithm (e.g., `JdbcTemplate`)
+
+---
+
+### 📝 9. DATA STRUCTURES & ALGORITHMS (DSA)
+
+**9.1 Data Structures**
+- [ ] **Array:** Two Pointers, Sliding Window
+- [ ] **String:** Palindrome, Anagram
+- [ ] **HashMap:** Frequency Count, Two Sum
+- [ ] **Stack:** Balanced Parentheses, Next Greater Element
+- [ ] **Queue:** BFS in Trees/Graphs
+- [ ] **LinkedList:** Reversal, Cycle Detection (Floyd's Tortoise and Hare)
+- [ ] **Tree:** Inorder/Preorder/Postorder (DFS), Level Order (BFS)
+- [ ] **Graph:** BFS (Shortest Path), DFS (Connected Components), Topological Sort
+- [ ] **Heap:** Top K Frequent Elements, Merge K Sorted Lists
+
+**9.2 Algorithms**
+- [ ] Sorting: Quick Sort (Average O(n log n)), Merge Sort (Stable)
+- [ ] Searching: Binary Search (Sorted Array, Answer Prediction)
+- [ ] Recursion & Backtracking (N-Queens, Sudoku)
+- [ ] Dynamic Programming: 0/1 Knapsack, Longest Common Subsequence
+- [ ] Greedy: Activity Selection, Fractional Knapsack
+
+---
+
+### 🏗️ 10. SYSTEM DESIGN (Senior Level Concepts)
+
+- [ ] Load Balancing: Round Robin, Least Connections, Consistent Hashing
+- [ ] Caching: Cache-Aside Pattern, Write-Through, Write-Behind
+- [ ] Database Scaling: Master-Slave Replication, Sharding (Horizontal Partitioning)
+- [ ] CAP Theorem (Consistency, Availability, Partition Tolerance)
+- [ ] **Microservices Patterns:**
+    - [ ] API Gateway (Single Entry Point)
+    - [ ] Service Discovery (Eureka, Consul)
+    - [ ] Circuit Breaker (Resilience4j - Prevent cascading failures)
+    - [ ] Saga Pattern (Distributed Transaction Management)
+- [ ] Idempotency in APIs (Handling duplicate requests)
